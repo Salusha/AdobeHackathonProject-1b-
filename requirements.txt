@@ -1,2 +1,2 @@
-pymupdf
-sentence-transformers
+PyMuPDF==1.23.7
+
