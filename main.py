@@ -1,92 +1,38 @@
-import sys
-import os
-import json
-from datetime import datetime
-from PyPDF2 import PdfReader
+import os, sys, json
+from src.parser import extract_candidate_sections
+from src.scorer import rank_sections
+from src.generator import assemble_output
 
-def extract_sections(pdf_path, keywords):
-    sections = []
-    try:
-        reader = PdfReader(pdf_path)
-        for i, page in enumerate(reader.pages):
-            text = page.extract_text()
-            if not text:
-                continue
-            for kw in keywords:
-                if kw.lower() in text.lower():
-                    section_title = text.split('\n')[0][:80]
-                    sections.append({
-                        "document": os.path.basename(pdf_path),
-                        "section_title": section_title,
-                        "importance_rank": 1,
-                        "page_number": i + 1
-                    })
-    except Exception as e:
-        print(f"Error reading {pdf_path}: {e}")
-    return sections
+def process_collection(col_name):
+    base = os.path.join("input", col_name)
+    with open(os.path.join(base, "challenge1b_input.json"), "r", encoding="utf-8") as f:
+        inp = json.load(f)
+    docs = [d["filename"] for d in inp["documents"]]
+    persona = inp["persona"]["role"]
+    job = inp["job_to_be_done"]["task"]
+    query = persona + " — " + job
 
-def extract_subsections(pdf_path, keywords):
-    subsections = []
-    try:
-        reader = PdfReader(pdf_path)
-        for i, page in enumerate(reader.pages):
-            text = page.extract_text()
-            if not text:
-                continue
-            for kw in keywords:
-                if kw.lower() in text.lower():
-                    refined_text = text[:500]
-                    subsections.append({
-                        "document": os.path.basename(pdf_path),
-                        "refined_text": refined_text,
-                        "page_number": i + 1
-                    })
-    except Exception as e:
-        print(f"Error reading {pdf_path}: {e}")
-    return subsections
+    # Collect all candidate sections across docs
+    candidates = []
+    for fn in docs:
+        pdf = os.path.join(base, "PDFs", fn)
+        for sec in extract_candidate_sections(pdf):
+            sec.update({"filename": fn})
+            candidates.append(sec)
 
-def process_collection(collection_name):
-    collection_path = os.path.join(os.getcwd(), collection_name)
-    input_json = os.path.join(collection_path, "challenge1b_input.json")
-    output_json = os.path.join(collection_path, "challenge1b_output.json")
-    pdf_folder = os.path.join(collection_path, "PDFs")
+    # Rank top sections
+    top_secs = rank_sections(candidates, query, top_k=len(docs)*2)
 
-    with open(input_json, 'r', encoding='utf-8') as f:
-        input_data = json.load(f)
+    # For subsections, you could re‑rank sentences within each top section.
+    # Here, we’ll simply reuse top_secs as rough subsections:
+    top_subs = top_secs
 
-    keywords = [
-        "city", "things to do", "cuisine", "restaurant", "hotel", "tips", "culture", "adventure", "nightlife", "packing", "water sports"
-    ]
-
-    extracted_sections = []
-    subsection_analysis = []
-
-    for doc in input_data["documents"]:
-        pdf_path = os.path.join(pdf_folder, doc["filename"])
-        extracted_sections.extend(extract_sections(pdf_path, keywords))
-        subsection_analysis.extend(extract_subsections(pdf_path, keywords))
-
-    for idx, section in enumerate(extracted_sections):
-        section["importance_rank"] = idx + 1
-
-    output = {
-        "metadata": {
-            "input_documents": [doc["filename"] for doc in input_data["documents"]],
-            "persona": input_data["persona"]["role"],
-            "job_to_be_done": input_data["job_to_be_done"]["task"],
-            "processing_timestamp": datetime.now().isoformat()
-        },
-        "extracted_sections": extracted_sections,
-        "subsection_analysis": subsection_analysis
-    }
-
-    with open(output_json, 'w', encoding='utf-8') as f:
-        json.dump(output, f, indent=4, ensure_ascii=False)
-
-    print(f"Output JSON generated at {output_json}")
+    assemble_output(os.path.join("output", col_name),
+                    docs, persona, job, top_secs, top_subs)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python main.py <CollectionFolder>")
+    if len(sys.argv) != 2:
+        print("Usage: python main.py <CollectionName>")
         sys.exit(1)
+    os.makedirs(os.path.join("output", sys.argv[1]), exist_ok=True)
     process_collection(sys.argv[1])
