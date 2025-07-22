@@ -52,6 +52,30 @@ def extract_subsections(pdf_path, keywords):
         print(f"Error reading {pdf_path}: {e}")
     return subsections
 
+
+# --- New helper functions for dynamic keyword extraction and PDF filtering ---
+import re
+
+def extract_keywords_from_task(task):
+    stopwords = {"the", "and", "for", "of", "to", "a", "in", "on", "with", "by", "is", "an", "as", "at", "from", "that", "this", "it", "be", "or", "are", "was", "were", "but", "not", "so", "do", "can", "will", "should", "has", "have", "had"}
+    words = re.findall(r'\w+', task.lower())
+    keywords = [w for w in words if w not in stopwords]
+    phrases = re.findall(r'\b\w+\s\w+\b', task.lower())
+    return list(set(keywords + phrases))
+
+def is_pdf_relevant(pdf_path, keywords):
+    filename = os.path.basename(pdf_path).lower()
+    if any(kw in filename for kw in keywords):
+        return True
+    try:
+        reader = PdfReader(pdf_path)
+        first_page = reader.pages[0].extract_text().lower() if reader.pages else ""
+        if any(kw in first_page for kw in keywords):
+            return True
+    except Exception:
+        pass
+    return False
+
 def process_collection(collection_path):
     input_json = os.path.join(collection_path, "challenge1b_input.json")
     output_json = os.path.join(collection_path, "challenge1b_output.json")
@@ -64,9 +88,9 @@ def process_collection(collection_path):
     with open(input_json, 'r', encoding='utf-8') as f:
         input_data = json.load(f)
 
-    keywords = [
-        "city", "things to do", "cuisine", "restaurant", "hotel", "tips", "culture", "adventure", "nightlife", "packing", "water sports"
-    ]
+    # Dynamically extract keywords from job description
+    task = input_data["job_to_be_done"]["task"]
+    keywords = extract_keywords_from_task(task)
 
     extracted_sections = []
     subsection_analysis = []
@@ -75,6 +99,9 @@ def process_collection(collection_path):
         pdf_path = os.path.join(pdf_folder, doc["filename"])
         if not os.path.exists(pdf_path):
             print(f"Warning: {pdf_path} not found, skipping.")
+            continue
+        if not is_pdf_relevant(pdf_path, keywords):
+            print(f"Skipping {pdf_path} as not relevant to job.")
             continue
         extracted_sections.extend(extract_sections(pdf_path, keywords))
         subsection_analysis.extend(extract_subsections(pdf_path, keywords))
