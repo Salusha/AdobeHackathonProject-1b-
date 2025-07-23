@@ -23,9 +23,6 @@ Thumbs.db
 # Jupyter Notebook checkpoints (if any)
 .ipynb_checkpoints/
 
-# PDF output (optional)
-*.pdf
-
 # Output JSONs
 output/**/*.json
 
