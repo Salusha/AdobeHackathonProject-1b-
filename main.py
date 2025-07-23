@@ -39,7 +39,22 @@ def extract_subsections(pdf_path, keywords):
                 continue
             for kw in keywords:
                 if kw.lower() in text.lower():
-                    refined_text = text[:500]
+                    clean_text = text.replace('\n', ' ')
+                    max_len = 500
+                    if len(clean_text) > max_len:
+                        # Find last sentence-ending punctuation before max_len
+                        last_dot = clean_text.rfind('.', 0, max_len)
+                        last_excl = clean_text.rfind('!', 0, max_len)
+                        last_q = clean_text.rfind('?', 0, max_len)
+                        last_end = max(last_dot, last_excl, last_q)
+                        if last_end > 0:
+                            refined_text = clean_text[:last_end+1]
+                        else:
+                            # Fallback: cut at last space
+                            last_space = clean_text.rfind(' ', 0, max_len)
+                            refined_text = clean_text[:last_space] if last_space > 0 else clean_text[:max_len]
+                    else:
+                        refined_text = clean_text
                     key = (os.path.basename(pdf_path), refined_text, i + 1)
                     if key not in unique_keys:
                         subsections.append({
