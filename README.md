@@ -1,9 +1,9 @@
 <!-- # AdobeHackathonProject-1b-
 # Build
-docker build -t persona-analyzer .
+docker build -t persona-section-extractor .
 
 # Run (CPU, no network, maps local files to container)
-docker run --rm -v $(pwd):/app --network none persona-analyzer -->
+docker run --rm -v $(pwd):/app --network none persona-section-extractor -->
 
 # 🧠 Adobe Hackathon 2025 – Round 1B  
 **Persona-Based Intelligent Section Extractor for PDFs**
@@ -21,7 +21,7 @@ Develop a document intelligence system that:
 ## ✅ Solution Overview
 
 This system:
-- Iterates over every `Collection` folder present.
+- Iterates over every `CollectionX` folder present (e.g., `Collection1`, `Collection2`, ...).
 - Parses all PDFs inside the `PDFs/` subfolder.
 - Extracts titles/headings/subsections that are contextually relevant.
 - Ranks sections and outputs results to `challenge1b_output.json`.
@@ -35,11 +35,11 @@ project_root/
 ├── main.py                         # Entry point — runs processing for all collections
 ├── src/
 │   └── processor.py                # Persona-based extraction and ranking logic
-├── Collection 1/
+├── Collection1/
 │   ├── PDFs/                       # Folder containing input PDFs
 │   ├── challenge1b_input.json      # Persona & job definition
 │   └── challenge1b_output.json     # Output written here after processing
-├── Collection 2/
+├── Collection2/
 │   ├── PDFs/
 │   ├── challenge1b_input.json
 │   └── challenge1b_output.json
@@ -101,6 +101,8 @@ project_root/
 docker build -t persona-section-extractor .
 ```
 
+> ℹ️  The Docker build step will also pre-download the required sentence-transformers model for offline use. No internet is needed at runtime.
+
 ### Step 2: Run the Container
 
 ```bash
@@ -110,7 +112,7 @@ docker run --rm -v $(pwd):/app --network none persona-section-extractor
 ✅ This command:
 - Mounts the current project directory.
 - Disables all internet access (`--network none`).
-- Automatically processes all `Collection N/` folders.
+- Automatically processes all `CollectionX/` folders (e.g., `Collection1`, `Collection2`, ...).
 - Writes output JSONs back into each respective collection.
 
 ---
@@ -128,7 +130,7 @@ pip install -r requirements.txt
 
 ## 🧪 Testing Your Setup
 
-1. Add your own `Collection N/` folder.
+1. Add your own `CollectionX/` folder (e.g., `Collection4/`).
 2. Add a few PDFs inside the `PDFs/` subfolder.
 3. Add a `challenge1b_input.json` defining the persona/job.
 4. Run the Docker container again.
@@ -139,17 +141,17 @@ pip install -r requirements.txt
 ## 🧾 Example Collections
 
 ```bash
-Collection 1/      # Travel Planning
+Collection1/      # Travel Planning
 ├── PDFs/
 ├── challenge1b_input.json
 ├── challenge1b_output.json
 
-Collection 2/      # Adobe Acrobat Learning
+Collection2/      # Adobe Acrobat Learning
 ├── PDFs/
 ├── challenge1b_input.json
 ├── challenge1b_output.json
 
-Collection 3/      # Recipes
+Collection3/      # Recipes
 ├── PDFs/
 ├── challenge1b_input.json
 ├── challenge1b_output.json
