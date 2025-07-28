@@ -1,3 +1,15 @@
+# PDF handling
 PyMuPDF==1.23.7
+PyPDF2==3.0.1
+
+# Sentence‑Transformers and its core deps
 sentence-transformers==2.2.2
+transformers==4.26.1
+huggingface-hub==0.13.4
+
+# NLP + ML utilities
 scikit-learn==1.2.2
+numpy==1.23.5
+scipy==1.9.3
+nltk==3.8.1
+regex==2024.11.6

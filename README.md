@@ -101,19 +101,23 @@ project_root/
 docker build -t persona-section-extractor .
 ```
 
-> ℹ️  The Docker build step will also pre-download the required sentence-transformers model for offline use. No internet is needed at runtime.
-
 ### Step 2: Run the Container
 
+#### ✅ On Linux/macOS (bash, zsh):
 ```bash
 docker run --rm -v $(pwd):/app --network none persona-section-extractor
 ```
 
+#### ✅ On Windows (PowerShell):
+```bash
+docker run --rm -v "${PWD}:/app" --network none persona-section-extractor
+```
+
 ✅ This command:
-- Mounts the current project directory.
+- Mounts the current project directory into the container.
 - Disables all internet access (`--network none`).
 - Automatically processes all `CollectionX/` folders (e.g., `Collection1`, `Collection2`, ...).
-- Writes output JSONs back into each respective collection.
+- Writes output JSONs back into each respective collection directory.
 
 ---
 
