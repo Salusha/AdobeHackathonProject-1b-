@@ -159,10 +159,16 @@ Collection3/      # Recipes
 
 ---
 
-## 📩 Contact
+## 👩‍💻 Author
 
-Developed by [Your Name] for Adobe Hackathon 2025 – Round 1B.
+Salusha — Participant, Adobe Hackathon 2025  
+GitHub: [https://github.com/salusha](https://github.com/salusha)
 
-For any issues, raise an issue on the repository or contact the contributor.
+Snehal Taori — Participant, Adobe Hackathon 2025  
+GitHub: [https://github.com/snehaltaori](https://github.com/snehaltaori)
+
+Deepanshi Verma — Participant, Adobe Hackathon 2025  
+GitHub: [https://github.com/DeepanshiiVerma](https://github.com/DeepanshiiVerma)
+
 
 ---
